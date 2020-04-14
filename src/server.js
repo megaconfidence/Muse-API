@@ -7,6 +7,7 @@ import config from './config'
 import { connect } from './utils/db'
 import userRouter from './resources/user/user.router'
 import playListRouter from './resources/playlist/playlist.router'
+import queueRouter from './resources/queue/queue.router'
 import { signin, protect } from './utils/auth'
 import passport from 'passport'
 import mongoSanitize from 'express-mongo-sanitize'
@@ -31,6 +32,7 @@ app.use('/signin', signin)
 app.use('/api', protect)
 app.use('/api/user', userRouter)
 app.use('/api/playlist', playListRouter)
+app.use('/api/queue', queueRouter)
 
 export const start = async () => {
   try {

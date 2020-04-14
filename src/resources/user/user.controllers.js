@@ -1,7 +1,12 @@
 import { User } from './user.model'
 
 export const me = (req, res) => {
-  res.status(200).json({ data: req.user })
+  const user = {
+    name: req.user.name,
+    email: req.user.email,
+    profileImageURL: req.user.profileImageURL
+  }
+  res.status(200).json({ data: user })
 }
 
 export const updateMe = async (req, res) => {

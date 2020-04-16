@@ -8,6 +8,7 @@ import { connect } from './utils/db'
 import userRouter from './resources/user/user.router'
 import playListRouter from './resources/playlist/playlist.router'
 import queueRouter from './resources/queue/queue.router'
+import likeRouter from './resources/like/like.router'
 import { signin, protect } from './utils/auth'
 import passport from 'passport'
 import mongoSanitize from 'express-mongo-sanitize'
@@ -19,10 +20,9 @@ app.disable('x-powered-by')
 app.use(cors())
 app.use(json())
 app.use(morgan('dev'))
-app.use(mongoSanitize());
+app.use(mongoSanitize())
 app.use(passport.initialize())
 app.use(urlencoded({ extended: true }))
-
 
 // Test if server is running
 app.get('/', (req, res) => {
@@ -33,6 +33,7 @@ app.use('/api', protect)
 app.use('/api/user', userRouter)
 app.use('/api/playlist', playListRouter)
 app.use('/api/queue', queueRouter)
+app.use('/api/like', likeRouter)
 
 export const start = async () => {
   try {

@@ -11,7 +11,9 @@ import queueRouter from './resources/queue/queue.router'
 import likeRouter from './resources/like/like.router'
 import { signin, protect } from './utils/auth'
 import passport from 'passport'
+import expressGraphQL from 'express-graphql'
 import mongoSanitize from 'express-mongo-sanitize'
+import graphQLSchema from './resources/graphql/schema'
 
 export const app = express()
 
@@ -30,6 +32,13 @@ app.get('/', (req, res) => {
 })
 app.use('/signin', signin)
 app.use('/api', protect)
+app.use(
+  '/graphql',
+  expressGraphQL({
+    graphiql: true,
+    schema: graphQLSchema,
+  })
+);
 app.use('/api/user', userRouter)
 app.use('/api/playlist', playListRouter)
 app.use('/api/queue', queueRouter)

@@ -10,6 +10,8 @@ import { Album } from './model/album'
 import { Song } from './model/song'
 import { Artist } from './model/artist'
 import { Genre } from './model/genre'
+import cheerio from 'cheerio'
+import fetch from 'node-fetch'
 
 const ArtistType = new GraphQLObjectType({
   name: 'Artist',
@@ -68,7 +70,14 @@ const AlbumType = new GraphQLObjectType({
     name: { type: GraphQLString },
     year: { type: GraphQLString },
     cover: { type: GraphQLString },
-    genre: { type: GraphQLList(GraphQLString) },
+    genre: {
+      type: GraphQLList(GenreType),
+      resolve(pVal, args) {
+        return Genre.find({ _id: pVal.genre })
+          .lean()
+          .exec()
+      }
+    },
     artist: {
       type: GraphQLList(ArtistType),
       resolve(pVal, args) {
@@ -93,6 +102,7 @@ const songType = new GraphQLObjectType({
   fields: () => ({
     _id: { type: GraphQLString },
     name: { type: GraphQLString },
+    playId: { type: GraphQLString },
     duration: { type: GraphQLString },
 
     album: {
@@ -226,6 +236,50 @@ const RootQuery = new GraphQLObjectType({
       args: { query: { type: GraphQLString } },
       resolve(pVal, args) {
         return Artist.find({ name: { $regex: args.query, $options: 'i' } })
+      }
+    },
+    searchGenre: {
+      type: GraphQLList(ArtistType),
+      args: { query: { type: GraphQLString } },
+      resolve(pVal, args) {
+        return Genre.find({ name: { $regex: args.query, $options: 'i' } })
+      }
+    },
+    getSongUrl: {
+      type: new GraphQLObjectType({
+        name: 'songurl',
+        fields: {
+          _id: { type: GraphQLString },
+          url: { type: GraphQLString }
+        }
+      }),
+      args: {
+        playId: { type: GraphQLString },
+        albumUrl: { type: GraphQLString }
+      },
+      async resolve(pVal, args) {
+        try {
+          const page = await fetch(args.albumUrl)
+            .then(res => res.text())
+            .then(body => body)
+
+          const $ = cheerio.load(page)
+          const playDiv = $('body')
+            .find(`#${args.playId}`)
+            .find('span.ico')
+            .attr('data-url')
+          if (playDiv) {
+            return {
+              _id: args.playId.replace('play_', ''),
+              url: 'https://myzuka.club' + playDiv
+            }
+          } else {
+            return null
+          }
+        } catch (err) {
+          console.log(err)
+          return null
+        }
       }
     }
   }

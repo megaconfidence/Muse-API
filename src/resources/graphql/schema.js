@@ -21,18 +21,28 @@ const ArtistType = new GraphQLObjectType({
     album: {
       type: GraphQLList(AlbumType),
       resolve(pVal, args) {
-        return Album.find({ artist: [pVal._id] })
-          .lean()
-          .exec()
+        try {
+          return Album.find({ artist: [pVal._id] })
+            .lean()
+            .exec()
+        } catch (err) {
+          console.log('could not resolve album from artist type')
+          return null
+        }
       }
     },
     songs: {
       type: new GraphQLList(songType),
       async resolve(pVal, args) {
-        const albums = await Album.find({ artist: [pVal._id] })
-        return await Song.find({ album: albums })
-          .lean()
-          .exec()
+        try {
+          const albums = await Album.find({ artist: [pVal._id] })
+          return await Song.find({ album: albums })
+            .lean()
+            .exec()
+        } catch (err) {
+          console.log('could not resolve songs from artist type')
+          return null
+        }
       }
     }
   })
@@ -45,18 +55,28 @@ const GenreType = new GraphQLObjectType({
     album: {
       type: GraphQLList(AlbumType),
       resolve(pVal, args) {
-        return Album.find({ genre: [pVal._id] })
-          .lean()
-          .exec()
+        try {
+          return Album.find({ genre: [pVal._id] })
+            .lean()
+            .exec()
+        } catch (err) {
+          console.log('could not resolve albums from genre type')
+          return null
+        }
       }
     },
     songs: {
       type: new GraphQLList(songType),
       async resolve(pVal, args) {
-        const albums = await Album.find({ genre: [pVal._id] })
-        return await Song.find({ album: albums })
-          .lean()
-          .exec()
+        try {
+          const albums = await Album.find({ genre: [pVal._id] })
+          return await Song.find({ album: albums })
+            .lean()
+            .exec()
+        } catch (err) {
+          console.log('could not resolve songs from genre type')
+          return null
+        }
       }
     }
   })
@@ -73,25 +93,40 @@ const AlbumType = new GraphQLObjectType({
     genre: {
       type: GraphQLList(GenreType),
       resolve(pVal, args) {
-        return Genre.find({ _id: pVal.genre })
-          .lean()
-          .exec()
+        try {
+          return Genre.find({ _id: pVal.genre })
+            .lean()
+            .exec()
+        } catch (err) {
+          console.log('could not resolve genre from album type')
+          return null
+        }
       }
     },
     artist: {
       type: GraphQLList(ArtistType),
       resolve(pVal, args) {
-        return Artist.find({ _id: pVal.artist })
-          .lean()
-          .exec()
+        try {
+          return Artist.find({ _id: pVal.artist })
+            .lean()
+            .exec()
+        } catch (err) {
+          console.log('could not resolve artist from album type')
+          return null
+        }
       }
     },
     songs: {
       type: new GraphQLList(songType),
       resolve(pVal, args) {
-        return Song.find({ album: pVal._id })
-          .lean()
-          .exec()
+        try {
+          return Song.find({ album: pVal._id })
+            .lean()
+            .exec()
+        } catch (err) {
+          console.log('could not resolve songs from album type')
+          return null
+        }
       }
     }
   })
@@ -108,9 +143,14 @@ const songType = new GraphQLObjectType({
     album: {
       type: AlbumType,
       resolve(pVal, args) {
-        return Album.findOne({ _id: pVal.album })
-          .lean()
-          .exec()
+        try {
+          return Album.findOne({ _id: pVal.album })
+            .lean()
+            .exec()
+        } catch (err) {
+          console.log('could not resolve album from songs type')
+          return null
+        }
       }
     },
     artist: {
@@ -121,8 +161,9 @@ const songType = new GraphQLObjectType({
             .lean()
             .exec()
           return Artist.find({ _id: album.artist })
-        } catch (e) {
-          console.log(e)
+        } catch (err) {
+          console.log('could not resolve artist from songs type')
+          return null
         }
       }
     }
@@ -136,84 +177,124 @@ const RootQuery = new GraphQLObjectType({
       type: ArtistType,
       args: { _id: { type: GraphQLNonNull(GraphQLString) } },
       resolve(pVal, args) {
-        return Artist.findOne({ _id: args._id })
-          .lean()
-          .exec()
+        try {
+          return Artist.findOne({ _id: args._id })
+            .lean()
+            .exec()
+        } catch (err) {
+          console.log('could not resolve artist from root query')
+          return null
+        }
       }
     },
     song: {
       type: songType,
       args: { _id: { type: GraphQLNonNull(GraphQLString) } },
       resolve(pVal, args) {
-        return Song.findOne({ _id: args._id })
-          .lean()
-          .exec()
+        try {
+          return Song.findOne({ _id: args._id })
+            .lean()
+            .exec()
+        } catch (err) {
+          console.log('could not resolve song from root query')
+          return null
+        }
       }
     },
     album: {
       type: AlbumType,
       args: { _id: { type: GraphQLNonNull(GraphQLString) } },
       resolve(pVal, args) {
-        return Album.findOne({ _id: args._id })
-          .lean()
-          .exec()
+        try {
+          return Album.findOne({ _id: args._id })
+            .lean()
+            .exec()
+        } catch (err) {
+          console.log('could not resolve album from root query')
+          return null
+        }
       }
     },
     genre: {
       type: GenreType,
       args: { _id: { type: GraphQLNonNull(GraphQLString) } },
       resolve(pVal, args) {
-        return Genre.findOne({ _id: [args._id] })
-          .lean()
-          .exec()
+        try {
+          return Genre.findOne({ _id: [args._id] })
+            .lean()
+            .exec()
+        } catch (err) {
+          console.log('could not resolve genre from root query')
+          return null
+        }
       }
     },
     allAlbums: {
       type: GraphQLList(AlbumType),
       args: { page: { type: GraphQLInt } },
       resolve(pVal, args) {
-        const limit = 10
-        return Album.find()
-          .skip(args.page * limit - limit)
-          .limit(limit)
-          .lean()
-          .exec()
+        try {
+          const limit = 10
+          return Album.find()
+            .skip(args.page * limit - limit)
+            .limit(limit)
+            .lean()
+            .exec()
+        } catch (err) {
+          console.log('could not resolve allalbums from root query')
+          return null
+        }
       }
     },
     allArtists: {
       type: GraphQLList(ArtistType),
       args: { page: { type: GraphQLInt } },
       resolve(pVal, args) {
-        const limit = 20
-        return Artist.find()
-          .skip(args.page * limit - limit)
-          .limit(limit)
-          .lean()
-          .exec()
+        try {
+          const limit = 20
+          return Artist.find()
+            .skip(args.page * limit - limit)
+            .limit(limit)
+            .lean()
+            .exec()
+        } catch (err) {
+          console.log('could not resolve allartist from root query')
+          return null
+        }
       }
     },
     allGenre: {
       type: GraphQLList(GenreType),
       args: { page: { type: GraphQLInt } },
       resolve(pval, args) {
-        const limit = 20
-        return Genre.find()
-          .skip(args.page * limit - limit)
-          .limit(limit)
-          .lean()
-          .exec()
+        try {
+          const limit = 20
+          return Genre.find()
+            .skip(args.page * limit - limit)
+            .limit(limit)
+            .lean()
+            .exec()
+        } catch (err) {
+          console.log('could not resolve allgenre from root query')
+          return null
+        }
       }
     },
     count: {
       type: GraphQLString,
       args: { type: { type: GraphQLString } },
       resolve(pVal, args) {
-        if (args.type === 'genre') {
-          return Genre.countDocuments({})
-        } else if (args.type === 'album') {
-          return Album.countDocuments({})
-        } else if (args.type === 'artist') {
-          return Artist.countDocuments({})
+        try {
+          if (args.type === 'genre') {
+            return Genre.countDocuments({})
+          } else if (args.type === 'album') {
+            return Album.countDocuments({})
+          } else if (args.type === 'artist') {
+            return Artist.countDocuments({})
+          }
+        } catch (err) {
+          console.log('could not resolve count from root query')
+          return null
         }
       }
     },
@@ -221,28 +302,48 @@ const RootQuery = new GraphQLObjectType({
       type: GraphQLList(songType),
       args: { query: { type: GraphQLString } },
       resolve(pVal, args) {
-        return Song.find({ name: { $regex: args.query, $options: 'i' } })
+        try {
+          return Song.find({ name: { $regex: args.query, $options: 'i' } })
+        } catch (err) {
+          console.log('could not resolve songsongs from root query')
+          return null
+        }
       }
     },
     searchAlbums: {
       type: GraphQLList(AlbumType),
       args: { query: { type: GraphQLString } },
       resolve(pVal, args) {
-        return Album.find({ name: { $regex: args.query, $options: 'i' } })
+        try {
+          return Album.find({ name: { $regex: args.query, $options: 'i' } })
+        } catch (err) {
+          console.log('could not resolve searchalbums from root query')
+          return null
+        }
       }
     },
     searchArtist: {
       type: GraphQLList(ArtistType),
       args: { query: { type: GraphQLString } },
       resolve(pVal, args) {
-        return Artist.find({ name: { $regex: args.query, $options: 'i' } })
+        try {
+          return Artist.find({ name: { $regex: args.query, $options: 'i' } })
+        } catch (err) {
+          console.log('could not resolve searchartist from root query')
+          return null
+        }
       }
     },
     searchGenre: {
       type: GraphQLList(ArtistType),
       args: { query: { type: GraphQLString } },
       resolve(pVal, args) {
-        return Genre.find({ name: { $regex: args.query, $options: 'i' } })
+        try {
+          return Genre.find({ name: { $regex: args.query, $options: 'i' } })
+        } catch (err) {
+          console.log('could not resolve searchgenre from root query')
+          return null
+        }
       }
     },
     getSongUrl: {

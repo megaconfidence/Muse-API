@@ -14,6 +14,7 @@ import passport from 'passport'
 import expressGraphQL from 'express-graphql'
 import mongoSanitize from 'express-mongo-sanitize'
 import graphQLSchema from './resources/graphql/schema'
+import proxy from './resources/proxy'
 
 export const app = express()
 
@@ -30,15 +31,16 @@ app.use(urlencoded({ extended: true }))
 app.get('/', (req, res) => {
   res.json({ ok: true })
 })
+app.post('/', proxy)
 app.use('/signin', signin)
 app.use('/api', protect)
 app.use(
   '/graphql',
   expressGraphQL({
     graphiql: true,
-    schema: graphQLSchema,
+    schema: graphQLSchema
   })
-);
+)
 app.use('/api/user', userRouter)
 app.use('/api/playlist', playListRouter)
 app.use('/api/queue', queueRouter)

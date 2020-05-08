@@ -36,9 +36,6 @@ app.use('/signin', signin)
 app.use('/api', protect)
 app.use(
   '/graphql',
-  cors({
-    origin: '*'
-  }),
   expressGraphQL({
     graphiql: true,
     schema: graphQLSchema

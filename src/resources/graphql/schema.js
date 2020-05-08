@@ -280,17 +280,50 @@ const RootQuery = new GraphQLObjectType({
         }
       }
     },
+    genreSongs: {
+      type: GraphQLList(songType),
+      args: { id: { type: GraphQLString }, page: { type: GraphQLInt } },
+      async resolve(pval, args) {
+        try {
+          const limit = 5
+          const albums = await Album.find({ genre: [args.id] })
+            .skip(args.page * limit - limit)
+            .limit(limit)
+          return await Song.find({ album: albums })
+            .lean()
+            .exec()
+        } catch (err) {
+          console.log('could not resolve allgenre from root query')
+          return null
+        }
+      }
+    },
+    genreSongsCount: {
+      type: GraphQLInt,
+      args: { id: { type: GraphQLString } },
+      async resolve(pval, args) {
+        try {
+          const albums = await Album.find({ genre: [args.id] })
+          return await Song.countDocuments({
+            album: albums
+          })
+        } catch (err) {
+          console.log('could not resolve genresongscount from root query')
+          return null
+        }
+      }
+    },
     count: {
-      type: GraphQLString,
+      type: GraphQLInt,
       args: { type: { type: GraphQLString } },
       resolve(pVal, args) {
         try {
           if (args.type === 'genre') {
-            return Genre.countDocuments({})
+            return Genre.estimatedDocumentCount()
           } else if (args.type === 'album') {
-            return Album.countDocuments({})
+            return Album.estimatedDocumentCount()
           } else if (args.type === 'artist') {
-            return Artist.countDocuments({})
+            return Artist.estimatedDocumentCount()
           }
         } catch (err) {
           console.log('could not resolve count from root query')
@@ -298,12 +331,45 @@ const RootQuery = new GraphQLObjectType({
         }
       }
     },
-    searchSongs: {
-      type: GraphQLList(songType),
-      args: { query: { type: GraphQLString } },
+    countSearch: {
+      type: GraphQLInt,
+      args: { type: { type: GraphQLString }, query: { type: GraphQLString } },
       resolve(pVal, args) {
         try {
+          if (args.type.includes('genre')) {
+            return Genre.countDocuments({
+              name: { $regex: args.query, $options: 'i' }
+            })
+          } else if (args.type.includes('album')) {
+            return Album.countDocuments({
+              name: { $regex: args.query, $options: 'i' }
+            })
+          } else if (args.type.includes('song')) {
+            return Song.countDocuments({
+              name: { $regex: args.query, $options: 'i' }
+            })
+          } else if (args.type.includes('artist')) {
+            return Artist.countDocuments({
+              name: { $regex: args.query, $options: 'i' }
+            })
+          }
+        } catch (err) {
+          console.log('could not resolve countsearch from root query')
+          return null
+        }
+      }
+    },
+    searchSongs: {
+      type: GraphQLList(songType),
+      args: { page: { type: GraphQLInt }, query: { type: GraphQLString } },
+      resolve(pVal, args) {
+        try {
+          const limit = 20
           return Song.find({ name: { $regex: args.query, $options: 'i' } })
+            .skip(args.page * limit - limit)
+            .limit(limit)
+            .lean()
+            .exec()
         } catch (err) {
           console.log('could not resolve songsongs from root query')
           return null
@@ -312,10 +378,15 @@ const RootQuery = new GraphQLObjectType({
     },
     searchAlbums: {
       type: GraphQLList(AlbumType),
-      args: { query: { type: GraphQLString } },
+      args: { page: { type: GraphQLInt }, query: { type: GraphQLString } },
       resolve(pVal, args) {
         try {
+          const limit = 20
           return Album.find({ name: { $regex: args.query, $options: 'i' } })
+            .skip(args.page * limit - limit)
+            .limit(limit)
+            .lean()
+            .exec()
         } catch (err) {
           console.log('could not resolve searchalbums from root query')
           return null
@@ -324,10 +395,15 @@ const RootQuery = new GraphQLObjectType({
     },
     searchArtist: {
       type: GraphQLList(ArtistType),
-      args: { query: { type: GraphQLString } },
+      args: { page: { type: GraphQLInt }, query: { type: GraphQLString } },
       resolve(pVal, args) {
         try {
+          const limit = 20
           return Artist.find({ name: { $regex: args.query, $options: 'i' } })
+            .skip(args.page * limit - limit)
+            .limit(limit)
+            .lean()
+            .exec()
         } catch (err) {
           console.log('could not resolve searchartist from root query')
           return null

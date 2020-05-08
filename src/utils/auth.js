@@ -7,7 +7,6 @@ import { Strategy as GoogleTokenStrategy } from 'passport-google-token'
 import config from '../config'
 import { User } from '../resources/user/user.model'
 import jwt from 'jsonwebtoken'
-import { PlayList } from '../resources/playlist/playlist.model'
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').load()
@@ -33,8 +32,6 @@ const socialCB = async (accessToken, refreshToken, profile, done) => {
     if (!user) {
       const newUser = await User.create(Profile)
       console.log('## created new user')
-
-      await PlayList.create({ content: [], createdBy: newUser._id })
       return done(null, newUser)
     }
     const oldProfile = pick(

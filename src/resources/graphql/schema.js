@@ -285,7 +285,7 @@ const RootQuery = new GraphQLObjectType({
       args: { id: { type: GraphQLString }, page: { type: GraphQLInt } },
       async resolve(pval, args) {
         try {
-          const limit = 5
+          const limit = 10
           const albums = await Album.find({ genre: [args.id] })
             .skip(args.page * limit - limit)
             .limit(limit)

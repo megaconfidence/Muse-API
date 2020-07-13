@@ -365,9 +365,15 @@ const RootQuery = new GraphQLObjectType({
       resolve(pVal, args) {
         try {
           const limit = 20
-          return Song.find({ name: { $regex: args.query, $options: 'i' } })
+          return Song.find(
+            { $text: { $search: args.query } },
+            {
+              score: { $meta: 'textScore' }
+            }
+          )
             .skip(args.page * limit - limit)
             .limit(limit)
+            .sort({ score: { $meta: 'textScore' } })
             .lean()
             .exec()
         } catch (err) {
@@ -382,9 +388,15 @@ const RootQuery = new GraphQLObjectType({
       resolve(pVal, args) {
         try {
           const limit = 20
-          return Album.find({ name: { $regex: args.query, $options: 'i' } })
+          return Album.find(
+            { $text: { $search: args.query } },
+            {
+              score: { $meta: 'textScore' }
+            }
+          )
             .skip(args.page * limit - limit)
             .limit(limit)
+            .sort({ score: { $meta: 'textScore' } })
             .lean()
             .exec()
         } catch (err) {
@@ -399,9 +411,15 @@ const RootQuery = new GraphQLObjectType({
       resolve(pVal, args) {
         try {
           const limit = 20
-          return Artist.find({ name: { $regex: args.query, $options: 'i' } })
+          return Artist.find(
+            { $text: { $search: args.query } },
+            {
+              score: { $meta: 'textScore' }
+            }
+          )
             .skip(args.page * limit - limit)
             .limit(limit)
+            .sort({ score: { $meta: 'textScore' } })
             .lean()
             .exec()
         } catch (err) {
@@ -415,7 +433,12 @@ const RootQuery = new GraphQLObjectType({
       args: { query: { type: GraphQLString } },
       resolve(pVal, args) {
         try {
-          return Genre.find({ name: { $regex: args.query, $options: 'i' } })
+          return Genre.find(
+            { $text: { $search: args.query } },
+            {
+              score: { $meta: 'textScore' }
+            }
+          ).sort({ score: { $meta: 'textScore' } })
         } catch (err) {
           console.log('could not resolve searchgenre from root query')
           return null

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import musicDB from './musicdb'
 
 const albumSchema = new mongoose.Schema({
   cover: {
@@ -37,4 +38,4 @@ const albumSchema = new mongoose.Schema({
 
 albumSchema.index({ artist: 1, name: 1 }, { unique: true })
 
-export const Album = mongoose.model('album', albumSchema)
+export const Album = musicDB.model('album', albumSchema)

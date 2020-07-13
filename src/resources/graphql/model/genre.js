@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import musicDB from './musicdb'
 
 const genreSchema = new mongoose.Schema({
   name: {
@@ -11,4 +12,4 @@ const genreSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 })
 
-export const Genre = mongoose.model('genre', genreSchema)
+export const Genre = musicDB.model('genre', genreSchema)

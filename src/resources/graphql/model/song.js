@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-
+import musicDB from './musicdb'
 const songSchema = new mongoose.Schema({
   name: {
     trim: true,
@@ -24,4 +24,4 @@ const songSchema = new mongoose.Schema({
 
 songSchema.index({ album: 1, name: 1 }, { unique: true })
 
-export const Song = mongoose.model('song', songSchema)
+export const Song = musicDB.model('song', songSchema)
